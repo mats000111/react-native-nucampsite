@@ -5,7 +5,9 @@ import * as SecureStore from "expo-secure-store";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import * as ImagePicker from "expo-image-picker";
 import { baseUrl } from "../shared/baseUrl";
-import logo from "../assets/images/logo.png"
+import logo from "../assets/images/logo.png";
+import * as ImageManipulator from "expo-image-manipulator";
+import { SaveFormat } from "expo-image-manipulator";
 
 const LoginTab = ({ navigation }) => {
     const [username, setUsername] = useState("");
@@ -144,9 +146,35 @@ const RegisterTab = () => {
             });
             if (!capturedImage.cancelled) {
                 console.log(capturedImage);
-                setImageUrl(capturedImage.uri);
+                processImage(capturedImage.uri);
             }
         }
+    }
+
+    const processImage = async (imgUri) => {
+        const processedImage = await ImageManipulator.manipulateAsync({
+            resize: {width: 40},
+            format: SaveFormat.PNG
+        })
+        console.log(processedImage)
+        setImageUrl(processedImage.uri)
+    }
+
+    const getImageFromGallery = async () => {
+        const mediaLibraryPermissions =
+            await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+        if (mediaLibraryPermission.status === "granted") {
+            const capturedImage = await ImagePicker.launchCameraAsync({
+                allowsEditing: true,
+                aspect: [1, 1]
+            });
+            if (!capturedImage.cancelled) {
+                console.log(capturedImage);
+                processImage(capturedImage.uri);
+            }
+        }
+        
     }
 
     return (
@@ -159,6 +187,7 @@ const RegisterTab = () => {
                         style={styles.image}
                     />
                     <Button title="Camera" onPress={getImageFromCamera} />
+                    <Button  title="Gallery" onPress={getImageFromGallery} />
                 </View>
                 <Input
                     placeholder="username"
